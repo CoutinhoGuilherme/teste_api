@@ -1,38 +1,37 @@
-name: Node.js CI
-
-on:
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
-
+name: CI
+on: push
 jobs:
-  build:
+  Teste:
     runs-on: ubuntu-latest
-
     services:
       mysql:
-        image: mysql:5.7
+        image: mysql:8.0
         env:
-          MYSQL_USER: root
           MYSQL_ROOT_PASSWORD: sua_senha
           MYSQL_DATABASE: usersdb
         ports:
-          - 3306:3306
-
+            - '3306:3306'
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
     steps:
-    - uses: actions/checkout@v2
-    - name: Use Node.js
-      uses: actions/setup-node@v1
-      with:
-        node-version: '14'
-    - name: Install dependencies
-      run: npm install
-    - name: Start MySQL
-      run: sudo /etc/init.d/mysql start
-    - name: Install cliente mysql
-      run: sudo apt install mysql-client
-    - name: Criar Tabelas
-      run: sudo mysql -u root -p usersdb < estrutura.sql
-    - name: Run tests
-      run: npm test
+      - name: Configure MySQL permissions
+        run: mysql -h 127.0.0.1 --port 3306 -u root -p sua_senha -e "ALTER USER 'root'@'%' IDENTIFIED BY 'password'; GRANT ALL PRIVILEGES ON *.* TO 'root'@'%'; FLUSH PRIVILEGES;"
+      
+      - uses: actions/checkout@v2
+      
+      - name: Cria Tabela
+        run: mysql -h 127.0.0.1 --port 3306 -u root -p sua_senha test < estrutura.sql
+
+      - name: Use Node.js
+        uses: actions/setup-node@v1
+        with:
+          node-version: '18'
+          
+      - name: Install dependencies
+        run: npm install    
+        
+      - name: Teste
+        env:
+          MYSQL_USER: root
+          MYSQL_PASSWORD: sua_senha
+          MYSQL_DATABASE: usersdb
+        run: npm test
