@@ -14,12 +14,12 @@ jobs:
         options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
     steps:
       - name: Configure MySQL permissions
-        run: mysql -h 127.0.0.1 --port 3306 -u root -p sua_senha -e "ALTER USER 'root'@'%' IDENTIFIED BY 'sua_senha'; GRANT ALL PRIVILEGES ON *.* TO 'root'@'%'; FLUSH PRIVILEGES;"
+        run: mysql -h 127.0.0.1 --port 3306 -u root -p password -e "ALTER USER 'root'@'%' IDENTIFIED BY 'sua_senha'; GRANT ALL PRIVILEGES ON *.* TO 'root'@'%'; FLUSH PRIVILEGES;"
       
       - uses: actions/checkout@v2
       
       - name: Cria Tabela
-        run: mysql -h 127.0.0.1 --port 3306 -u root -p sua_senha usersdb < estrutura.sql
+        run: mysql -h 127.0.0.1 --port 3306 -u root -p password usersdb < estrutura.sql
 
       - name: Use Node.js
         uses: actions/setup-node@v1
